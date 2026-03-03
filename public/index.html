@@ -489,6 +489,9 @@ let selectedCategory = '';
 let selectedCards = [];
 let maxCards = 1;
 let revealIndex = 0;
+let isUpgrade = false;       // true when upgrading Express → Profunda
+let expressCard = null;       // stores the Express card for upgrade
+let expressQuestion = '';     // stores original question/category
 
 const STRIPE_LINKS = {
   profunda: 'https://buy.stripe.com/6oUfZaffh4WC6H27GR4Ni04'
@@ -538,8 +541,31 @@ function startReading(product) {
   maxCards = product === 'express' ? 1 : 3;
   selectedCards = [];
   selectedCategory = '';
+  isUpgrade = false;
+  expressCard = null;
   goTo('ritual');
   showRitualStep(1);
+}
+
+// ═══════════════════════════════════════
+// UPGRADE: Express → Profunda (continuation)
+// ═══════════════════════════════════════
+function upgradeFromExpress() {
+  closePayModal();
+  // Save Express card as "Presente"
+  expressCard = { ...selectedCards[0] };
+  expressQuestion = selectedCategory;
+  // Switch to profunda mode
+  currentProduct = 'profunda';
+  maxCards = 2; // only need 2 more (Pasado + Futuro)
+  isUpgrade = true;
+  selectedCards = [];
+  // Skip ritual — go straight to mesa with message
+  setupMesa();
+  goTo('mesa');
+  // Update UI to show upgrade message
+  const mesaTitle = document.querySelector('#screen-mesa h2');
+  if (mesaTitle) mesaTitle.textContent = 'Elige 2 cartas más';
 }
 
 // ═══════════════════════════════════════
@@ -600,12 +626,21 @@ let mesaDeck = [];
 function setupMesa() {
   selectedCards = [];
   updateMesaCounter();
-  document.getElementById('mesaSub').textContent =
-    maxCards === 1 ? 'Selecciona 1 carta que te llame' : `Selecciona ${maxCards} cartas que te llamen`;
+
+  if (isUpgrade && expressCard) {
+    document.getElementById('mesaSub').textContent = `Tu carta "${expressCard.name}" será el Presente. Elige 2 más: Pasado y Futuro.`;
+  } else {
+    document.getElementById('mesaSub').textContent =
+      maxCards === 1 ? 'Selecciona 1 carta que te llame' : `Selecciona ${maxCards} cartas que te llamen`;
+  }
   document.getElementById('btnReveal').disabled = true;
 
-  // Shuffle deck
-  mesaDeck = [...ARCANA].sort(() => Math.random() - 0.5).slice(0, 12);
+  // Shuffle deck — exclude express card in upgrade mode
+  let pool = [...ARCANA];
+  if (isUpgrade && expressCard) {
+    pool = pool.filter(c => c.number !== expressCard.number);
+  }
+  mesaDeck = pool.sort(() => Math.random() - 0.5).slice(0, 12);
   // Add reversed chance (30%)
   mesaDeck = mesaDeck.map(c => ({ ...c, reversed: Math.random() < 0.3 }));
 
@@ -651,10 +686,22 @@ function updateMesaCounter() {
 function startReveal() {
   goTo('reveal');
   revealIndex = 0;
+
+  // In upgrade mode, assemble all 3 cards: [Pasado=new1, Presente=expressCard, Futuro=new2]
+  if (isUpgrade && expressCard) {
+    const allCards = [selectedCards[0], expressCard, selectedCards[1]];
+    selectedCards = allCards;
+    maxCards = 3;
+    isUpgrade = false; // reset flag, we have all 3 now
+  }
+
   const positions = selectedCards.length === 1 ? ['Tu mensaje'] : ['Pasado', 'Presente', 'Futuro'];
   const slots = document.getElementById('revealSlots');
-  slots.innerHTML = selectedCards.map((c, i) => `
-    <div class="reveal-card" id="revCard${i}">
+  slots.innerHTML = selectedCards.map((c, i) => {
+    // In upgrade results, the middle card (Presente/express) is already revealed
+    const preRevealed = (expressCard && i === 1);
+    return `
+    <div class="reveal-card ${preRevealed ? 'flipped' : ''}" id="revCard${i}">
       <div class="card-back-lg"></div>
       <div class="card-front">
         <div class="cf-number">${c.number}</div>
@@ -663,17 +710,36 @@ function startReveal() {
         ${c.reversed ? '<div class="cf-reversed">Invertida</div>' : ''}
       </div>
     </div>
-  `).join('');
+  `}).join('');
 
-  document.getElementById('revealMessage').textContent = 'Toca la carta para revelarla…';
-  document.getElementById('revealPosition').textContent = positions[0] || '';
+  // If express card is already revealed, skip it in reveal sequence
+  if (expressCard) {
+    revealIndex = 0; // start with Pasado (index 0)
+    document.getElementById('revealMessage').textContent = `${expressCard.name} ya te acompaña. Toca para revelar las nuevas…`;
+    document.getElementById('revealPosition').textContent = 'Pasado';
+    setTimeout(() => { revealNext(positions); }, 2000);
+  } else {
+    document.getElementById('revealMessage').textContent = 'Toca la carta para revelarla…';
+    document.getElementById('revealPosition').textContent = positions[0] || '';
+    slots.onclick = function() { revealNext(positions); };
+    setTimeout(() => { revealNext(positions); }, 1500);
+  }
 
-  // Click to reveal one by one
+  // Always enable click to reveal
   slots.onclick = function() { revealNext(positions); };
-  setTimeout(() => { revealNext(positions); }, 1500);
 }
 
 function revealNext(positions) {
+  // Skip already-revealed cards (express card at index 1 in upgrade)
+  while (revealIndex < selectedCards.length) {
+    const card = document.getElementById('revCard' + revealIndex);
+    if (card && card.classList.contains('flipped')) {
+      revealIndex++;
+      continue;
+    }
+    break;
+  }
+
   if (revealIndex >= selectedCards.length) {
     // All revealed — proceed
     setTimeout(() => {
@@ -692,9 +758,17 @@ function revealNext(positions) {
   document.getElementById('revealMessage').textContent = `${c.name} ${c.reversed ? '(Invertida)' : ''}`;
   revealIndex++;
 
-  if (revealIndex < selectedCards.length) {
+  // Skip express card in next check too
+  let nextIdx = revealIndex;
+  while (nextIdx < selectedCards.length) {
+    const nextCard = document.getElementById('revCard' + nextIdx);
+    if (nextCard && nextCard.classList.contains('flipped')) { nextIdx++; continue; }
+    break;
+  }
+
+  if (nextIdx < selectedCards.length) {
     setTimeout(() => {
-      document.getElementById('revealPosition').textContent = positions[revealIndex] || '';
+      document.getElementById('revealPosition').textContent = positions[nextIdx] || '';
       document.getElementById('revealMessage').textContent = 'Toca para revelar la siguiente…';
     }, 2000);
   }
@@ -799,8 +873,8 @@ function showDemoResults() {
       <div class="soul-message"><h3>Mensaje del alma</h3><p>${esc(demoSoul)}</p></div>
       <div class="lock-overlay">
         <div class="lock-icon">✦</div>
-        <div class="lock-text">Tu mensaje del alma está listo.<br>Desbloquéalo con la Tirada Profunda.</div>
-        <button class="lock-cta" onclick="openPayModal()">3 cartas · Lectura completa · 1,99 €</button>
+        <div class="lock-text">Tu carta ya reveló el Presente.<br>Añade Pasado y Futuro para ver el arco completo.</div>
+        <button class="lock-cta" onclick="openPayModal()">Continuar con 3 cartas · 1,99 €</button>
       </div>
     </div>
   ` : `
@@ -928,20 +1002,37 @@ function getDemoCristal(card) {
 // ═══════════════════════════════════════
 function openPayModal() {
   document.getElementById('payOverlay').classList.add('show');
-  document.getElementById('payModal').innerHTML = `
+  const modal = document.getElementById('payModal');
+  modal.innerHTML = `
     <h3>Tirada Profunda</h3>
     <div class="pay-price">1,99 €</div>
     <ul class="pay-features">
-      <li>3 cartas: Pasado, Presente y Futuro</li>
+      <li>Tu carta actual + 2 nuevas (Pasado y Futuro)</li>
       <li>Lectura completa narrativa (~500 palabras)</li>
       <li>Mensaje del alma integrador</li>
       <li>Cristal y ritual personalizados</li>
       <li>Referencia científica de tu lectura</li>
       <li>Base: neurociencia de la intuición</li>
     </ul>
-    <button class="pay-btn-stripe" onclick="window.open('${STRIPE_LINKS.profunda}','_blank')">Pagar con tarjeta</button>
+    <div id="payStep1">
+      <button class="pay-btn-stripe" onclick="handlePayClick()">Pagar con tarjeta — 1,99 €</button>
+    </div>
+    <div id="payStep2" style="display:none">
+      <p style="font-size:12px;color:var(--gold);text-align:center;margin-bottom:12px">¿Has completado el pago?</p>
+      <button class="btn-primary" onclick="upgradeFromExpress()" style="margin-bottom:8px">✦ Continuar con mi tirada</button>
+      <button class="pay-btn-stripe" onclick="window.open(STRIPE_LINKS.profunda,'_blank')">Reintentar pago</button>
+    </div>
     <button class="btn-ghost pay-close" onclick="closePayModal()">Ahora no</button>
   `;
+}
+
+function handlePayClick() {
+  window.open(STRIPE_LINKS.profunda, '_blank');
+  // Show continuation step after opening Stripe
+  setTimeout(() => {
+    document.getElementById('payStep1').style.display = 'none';
+    document.getElementById('payStep2').style.display = 'block';
+  }, 1500);
 }
 
 function closePayModal() { document.getElementById('payOverlay').classList.remove('show'); }
