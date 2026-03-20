@@ -404,7 +404,7 @@ h1, h2, h3 { font-family: var(--serif); font-weight: 300; color: var(--white); }
           <div class="pc-desc">1 carta · Mensaje del momento · Lectura breve</div>
         </div>
         <div class="product-card featured" onclick="startReading('profunda')">
-          <div class="pc-row"><span class="pc-name">Tirada Profunda <span class="pc-badge">Popular</span></span><span class="pc-price">1,99 €</span></div>
+          <div class="pc-row"><span class="pc-name">Tirada Profunda <span class="pc-badge">Popular</span></span><span class="pc-price">4,99 €</span></div>
           <div class="pc-desc">3 cartas · Pasado, Presente, Futuro · Lectura completa + ritual + cristal</div>
         </div>
       </div>
@@ -520,7 +520,7 @@ let expressCard = null;       // stores the Express card for upgrade
 let expressQuestion = '';     // stores original question/category
 
 const STRIPE_LINKS = {
-  profunda: 'https://buy.stripe.com/6oUfZaffh4WC6H27GR4Ni04'
+  profunda: 'https://buy.stripe.com/8x29AM8QTcp48Pa1it4Ni0b'
 };
 
 // ═══════════════════════════════════════
@@ -900,7 +900,7 @@ function showDemoResults() {
       <div class="lock-overlay">
         <div class="lock-icon">✦</div>
         <div class="lock-text">Tu carta ya reveló el Presente.<br>Añade Pasado y Futuro para ver el arco completo.</div>
-        <button class="lock-cta" onclick="openPayModal()">Continuar con 3 cartas · 1,99 €</button>
+        <button class="lock-cta" onclick="openPayModal()">Continuar con 3 cartas · 4,99 €</button>
       </div>
     </div>
   ` : `
@@ -924,7 +924,7 @@ function showDemoResults() {
       <h3>${isExpress ? 'Profundiza con 3 cartas' : 'Explora más'}</h3>
       <div class="ornament">✦</div>
       <div class="cta-buttons">
-        ${isExpress ? `<button class="btn-primary" onclick="openPayModal()">Tirada Profunda — 1,99 €</button>` : ''}
+        ${isExpress ? `<button class="btn-primary" onclick="openPayModal()">Tirada Profunda — 4,99 €</button>` : ''}
         <button class="btn-secondary" onclick="startReading('express')">Nueva tirada express (gratis)</button>
         <button class="btn-secondary" onclick="window.open('https://carta.selenaura.com','_blank')">Mi Carta Astral</button>
         <button class="btn-secondary" onclick="window.open('https://quiro.selenaura.com','_blank')">Quirología</button>
@@ -1031,7 +1031,7 @@ function openPayModal() {
   const modal = document.getElementById('payModal');
   modal.innerHTML = `
     <h3>Tirada Profunda</h3>
-    <div class="pay-price">1,99 €</div>
+    <div class="pay-price">4,99 €</div>
     <ul class="pay-features">
       <li>Tu carta actual + 2 nuevas (Pasado y Futuro)</li>
       <li>Lectura completa narrativa (~500 palabras)</li>
@@ -1041,7 +1041,7 @@ function openPayModal() {
       <li>Base: neurociencia de la intuición</li>
     </ul>
     <div id="payStep1">
-      <button class="pay-btn-stripe" onclick="handlePayClick()">Pagar con tarjeta — 1,99 €</button>
+      <button class="pay-btn-stripe" onclick="handlePayClick()">Pagar con tarjeta — 4,99 €</button>
     </div>
     <div id="payStep2" style="display:none">
       <p style="font-size:12px;color:var(--gold);text-align:center;margin-bottom:12px">¿Has completado el pago?</p>
