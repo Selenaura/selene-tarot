@@ -845,21 +845,20 @@ function showDemoResults() {
   const isExpress = currentProduct === 'express';
   const positions = selectedCards.length === 1 ? ['Tu mensaje'] : ['Pasado', 'Presente', 'Futuro'];
 
-  // Generate demo readings
+  // Generate readings — paid content ONLY for profunda (never in DOM for express)
   const readings = selectedCards.map((card, i) => ({
     nombre: card.name,
     posicion: positions[i],
     invertida: card.reversed,
     symbol: card.symbol,
     lectura_corta: getDemoShort(card),
-    lectura_completa: getDemoFull(card, positions[i]),
-    consejo: getDemoConsejo(card),
-    keywords: card.keywords
+    lectura_completa: isExpress ? '' : getDemoFull(card, positions[i]),
+    consejo: isExpress ? '' : getDemoConsejo(card),
+    keywords: isExpress ? [] : card.keywords
   }));
 
-  const demoSoul = getDemoSoulMessage(selectedCards);
-  const demoCristal = getDemoCristal(selectedCards[0]);
-  const demoRitual = 'Enciende una vela blanca, coloca tu mano izquierda sobre el corazón y repite tres veces en voz baja: "Confío en lo que emerge." Deja que la vela se consuma mientras meditas sobre tu lectura.';
+  const demoSoul = isExpress ? '' : getDemoSoulMessage(selectedCards);
+  const demoCristal = isExpress ? null : getDemoCristal(selectedCards[0]);
 
   // Build HTML
   const cardsRow = selectedCards.map((card, i) => `
@@ -893,11 +892,10 @@ function showDemoResults() {
     `;
   }).join('');
 
-  // Locked soul + extras for express
+  // Soul + extras: express shows empty locked zone (no content in DOM), profunda shows full
   const soulHTML = isExpress ? `
     <div class="locked-zone" style="min-height:140px;border-radius:12px;margin:16px 0">
-      <div class="soul-message"><h3>Mensaje del alma</h3><p>${esc(demoSoul)}</p></div>
-      <div class="lock-overlay">
+      <div class="lock-overlay" style="position:relative;inset:auto;background:none;">
         <div class="lock-icon">✦</div>
         <div class="lock-text">Tu carta ya reveló el Presente.<br>Añade Pasado y Futuro para ver el arco completo.</div>
         <button class="lock-cta" onclick="openPayModal()">Continuar con 3 cartas · 4,99 €</button>
