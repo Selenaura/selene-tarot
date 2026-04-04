@@ -1,6 +1,23 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
+<!-- Google Consent Mode v2 (AEPD) -->
+<script>
+window.dataLayer = window.dataLayer || [];
+function gtag(){dataLayer.push(arguments);}
+gtag('consent', 'default', {
+  'analytics_storage': 'denied',
+  'ad_storage': 'denied',
+  'ad_user_data': 'denied',
+  'ad_personalization': 'denied'
+});
+</script>
+<!-- GA4 -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-BGJQPZSNPT"></script>
+<script>
+gtag('js', new Date());
+gtag('config', 'G-BGJQPZSNPT', { send_page_view: true });
+</script>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
 <title>Selene · Tarot Intuitivo</title>
@@ -1060,6 +1077,37 @@ function handlePayClick() {
 }
 
 function closePayModal() { document.getElementById('payOverlay').classList.remove('show'); }
+</script>
+<!-- Cookie Consent Banner (AEPD) -->
+<div id="cookie-banner" style="display:none; position:fixed; bottom:0; left:0; right:0; background:#12121A; border-top:1px solid #2A2A35; padding:16px 24px; z-index:99999; font-family:system-ui,sans-serif;">
+  <div style="max-width:900px; margin:0 auto; display:flex; align-items:center; justify-content:space-between; flex-wrap:wrap; gap:12px;">
+    <p style="color:#ccc; font-size:14px; margin:0; flex:1; min-width:200px;">
+      Usamos cookies analíticas para mejorar tu experiencia. <a href="/cookies" style="color:#C9A84C; text-decoration:underline;">Política de cookies</a>
+    </p>
+    <div style="display:flex; gap:8px;">
+      <button onclick="rejectCookies()" style="padding:8px 16px; background:transparent; border:1px solid #2A2A35; color:#ccc; border-radius:6px; cursor:pointer; font-size:13px;">Rechazar</button>
+      <button onclick="acceptCookies()" style="padding:8px 16px; background:#C9A84C; border:none; color:#0A0A0F; border-radius:6px; cursor:pointer; font-size:13px; font-weight:600;">Aceptar</button>
+    </div>
+  </div>
+</div>
+<script>
+(function(){
+  var consent = localStorage.getItem('selene_cookie_consent');
+  if (!consent) {
+    document.getElementById('cookie-banner').style.display = 'block';
+  } else if (consent === 'accepted') {
+    gtag('consent', 'update', { 'analytics_storage': 'granted' });
+  }
+})();
+function acceptCookies() {
+  localStorage.setItem('selene_cookie_consent', 'accepted');
+  gtag('consent', 'update', { 'analytics_storage': 'granted' });
+  document.getElementById('cookie-banner').style.display = 'none';
+}
+function rejectCookies() {
+  localStorage.setItem('selene_cookie_consent', 'rejected');
+  document.getElementById('cookie-banner').style.display = 'none';
+}
 </script>
 </body>
 </html>
