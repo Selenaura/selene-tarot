@@ -370,6 +370,14 @@ h1, h2, h3 { font-family: var(--serif); font-weight: 300; color: var(--white); }
 .cta-section h3 { font-size: 18px; margin-bottom: 6px; }
 .cta-buttons { display: flex; flex-direction: column; gap: 8px; margin-top: 16px; }
 .disclaimer { margin-top: 24px; padding: 12px; font-size: 10px; color: var(--text-dim); text-align: center; line-height: 1.6; border-top: 1px solid var(--border-light); }
+/* Upsell Banner */
+.upsell-banner{margin:32px auto;max-width:560px;padding:32px 28px;border-radius:16px;background:linear-gradient(135deg,rgba(15,15,24,0.9),rgba(30,30,50,0.9));border:1.5px solid rgba(201,168,76,0.35);text-align:center;position:relative;overflow:hidden}
+.upsell-banner::before{content:'';position:absolute;inset:-1px;border-radius:16px;padding:1.5px;background:linear-gradient(135deg,rgba(201,168,76,0.5),rgba(201,168,76,0.1),rgba(201,168,76,0.5));-webkit-mask:linear-gradient(#fff 0 0) content-box,linear-gradient(#fff 0 0);-webkit-mask-composite:xor;mask-composite:exclude;pointer-events:none}
+.upsell-banner h3{font-family:var(--serif);font-size:20px;color:var(--gold);margin-bottom:12px;font-weight:500}
+.upsell-banner p{font-size:14px;color:var(--text-dim);line-height:1.7;margin-bottom:20px;font-weight:300}
+.upsell-btn{display:inline-block;padding:14px 32px;border-radius:50px;font-size:14px;font-weight:600;text-decoration:none;transition:all 0.3s;cursor:pointer;border:none}
+.upsell-btn.primary{background:linear-gradient(135deg,#C9A84C,#E2CA7A);color:#0f0f18}
+.upsell-btn.primary:hover{transform:translateY(-2px);box-shadow:0 8px 24px rgba(201,168,76,0.3)}
 
 /* ═══ PAY MODAL ═══ */
 .pay-overlay { display: none; position: fixed; inset: 0; z-index: 100; background: rgba(0,0,0,0.8); backdrop-filter: blur(6px); }
@@ -944,6 +952,11 @@ function showDemoResults() {
         <button class="btn-secondary" onclick="window.open('https://carta.selenaura.com','_blank')">Mi Carta Astral</button>
         <button class="btn-secondary" onclick="window.open('https://quiro.selenaura.com','_blank')">Quirología</button>
       </div>
+    </div>
+    <div class="upsell-banner fade-in stagger-5">
+      <h3>¿Te ha resonado tu lectura?</h3>
+      <p>Profundiza con el Master en Guia Espiritual Profesional — aprende a leer tarot profesionalmente, domina los 78 arcanos y convierte tu don en una carrera.</p>
+      <a href="https://academy.selenaura.com/programa/guia-profesional?utm_source=reading&utm_medium=upsell&utm_campaign=tarot" class="upsell-btn primary" target="_blank" rel="noopener">Master en Guia Espiritual Profesional</a>
     </div>
     <div class="disclaimer">El tarot es una herramienta milenaria de autoconocimiento basada en arquetipos universales (Jung, 1960). No constituye asesoramiento médico, psicológico ni financiero. Las lecturas de Selene integran estudios de neurociencia de la intuición con fines de reflexión personal.</div>
   `;
